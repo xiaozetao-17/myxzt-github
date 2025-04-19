@@ -1,5 +1,8 @@
-FROM amazonlinux:2
-MAINTAINER jieding
-LABEL app="eureka" version="0.0.1" by="jieding"
-COPY ./target/eureka-server-1.5.10.RELEASE.jar eurekaserver.jar
-CMD java -jar eurekaserver.jar
+FROM amazonlinux:2023
+RUN mkdir /srv1
+WORKDIR /srv1
+RUN echo {"server_port":80} > /srv1/config.json
+COPY server.zip /srv1
+RUN unzip /srv1/server.zip
+RUN chmod +x /srv1/server1
+CMD ["/srv1/server1"]

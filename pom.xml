@@ -3,7 +3,7 @@
 <modelVersion>4.0.0</modelVersion>
 <!--  项目的基本信息  -->
 <groupId>com.example</groupId>
-<artifactId>my - project</artifactId>
+<artifactId>my-project</artifactId>
 <version>1.0-SNAPSHOT</version>
 <packaging>jar</packaging>
 <!--  项目名称和描述  -->

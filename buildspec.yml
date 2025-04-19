@@ -6,6 +6,7 @@ phases:
       java: corretto11
   pre_build:
     commands:
+      - mvn clean install
       - echo Doing mvn test...
       - mvn test
       - echo Logging in to Amazon ECR...

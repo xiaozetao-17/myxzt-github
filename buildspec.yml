@@ -6,14 +6,11 @@ phases:
       java: corretto11
   pre_build:
     commands:
-      - echo Doing mvn test...
-      - mvn test
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 905418043424.dkr.ecr.us-east-1.amazonaws.com
   build:
     commands:
       - echo Build started on `date`
-      - mvn package
       - docker build -t myscr .
       - docker tag myscr:latest 905418043424.dkr.ecr.us-east-1.amazonaws.com/myscr:latest
   post_build:

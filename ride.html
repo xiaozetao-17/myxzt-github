@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Wild Rydes</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Serverless web application example">
+    <meta name="author" content="">
+
+    <!-- 引入 Bootstrap 样式 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- 引入 ESRI 样式 -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css">
+    <!-- 引入其他 CSS 样式 -->
+    <link rel="stylesheet" href="/css/ride.css">
+    <link rel="stylesheet" href="/css/message.css">
+
+    <style>
+        html, body, #map {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 新增确认写入按钮的样式 */
+        #confirmButton {
+            position: absolute;
+            top: 50%; /* 设置为左上角和左下角之间的中间位置 */
+            left: 10px; /* 距离左边的间距 */
+            transform: translateY(-50%); /* 垂直居中 */
+            background-color: #90EE90; /* 浅绿色 */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        #confirmButton:hover {
+            background-color: #76e076; /* 按钮悬停效果 */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="info panel panel-default">
+        <div class="panel-heading">
+            <!-- 初始状态设置为可用 -->
+            <button id="request" class="btn btn-primary">Set pickup</button>
+            <div class="dropdown pull-right">
+                <button id="accountLink" class="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Account <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="accountLink">
+                    <li><a id="signOut" href="#">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body">
+            <ol id="updates">
+                <li>Welcome! Click the map to set your pickup location.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="main">
+        <div id="map"></div> <!-- 地图容器 -->
+    </div>
+
+    <!-- 新增确认写入按钮 -->
+    <button id="confirmButton">确认写入</button>
+
+    <script src="js/vendor/jquery-3.1.0.js"></script>
+    <script src="js/vendor/bootstrap.min.js"></script>
+    <script src="https://js.arcgis.com/4.27/"></script>
+
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/Graphic",
+            "esri/geometry/Point",
+            "esri/symbols/SimpleMarkerSymbol"
+        ], function(Map, MapView, Graphic, Point, SimpleMarkerSymbol) {
+            // 创建地图
+            const map = new Map({
+                basemap: "streets-vector"  // 使用矢量街道底图
+            });
+
+            // 创建地图视图
+            const view = new MapView({
+                container: "map",    // 使用更新后的容器ID
+                map: map,            // 引用上面创建的地图
+                center: [116.4074, 39.9042],  // 北京的经纬度
+                zoom: 12             // 缩放级别
+            });
+
+            let pickupLocation = null;
+
+            // 地图点击事件
+            view.on("click", function(event) {
+                // 启用 "Set pickup" 按钮
+                document.getElementById("request").disabled = false;
+
+                // 获取点击位置的经纬度
+                const point = new Point({
+                    longitude: event.mapPoint.longitude,
+                    latitude: event.mapPoint.latitude
+                });
+
+                // 创建标记符号
+                const markerSymbol = new SimpleMarkerSymbol({
+                    color: [226, 119, 40],  // 颜色
+                    size: 10,                // 大小
+                    outline: {               // 外轮廓
+                        color: [255, 255, 255],
+                        width: 2
+                    }
+                });
+
+                // 创建点击位置的图形
+                const pointGraphic = new Graphic({
+                    geometry: point,
+                    symbol: markerSymbol
+                });
+
+                // 在地图上添加点击位置标记
+                view.graphics.removeAll();  // 清除之前的标记
+                view.graphics.add(pointGraphic);
+
+                // 存储点击的位置
+                pickupLocation = point;
+            });
+
+            // 取消现有按钮功能，改为新的功能
+            document.getElementById("confirmButton").addEventListener("click", function() {
+                // 发送 GET 请求到新的 API Gateway
+                fetch("请修改成你的apigw地址", { //e.g. https://jvyda4tsmj.execute-api.us-east-1.amazonaws.com/prd/
+                    method: "GET"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response from API:", data);
+                    alert("Data successfully added!");
+                })
+                .catch(error => {
+                    console.error("Error calling API:", error);
+                    alert("Failed to add data.");
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
